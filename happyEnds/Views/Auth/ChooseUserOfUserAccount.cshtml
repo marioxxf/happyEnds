@@ -1,0 +1,57 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+    Layout = "~/Views/Shared/myLayout.cshtml";
+
+    var userAccountLoggedId = "";
+    if (Html.Action("UserAccountLoggedId", "Auth") == null)
+    {
+        userAccountLoggedId = "";
+    }
+    else
+    {
+        userAccountLoggedId = Html.Action("UserAccountLoggedId", "Auth").ToString();
+    }
+
+    var usersOfUserAccount = new Business.User().SearchUsersByUserAccountNickname(userAccountLoggedId);
+    var sessionId = Session.SessionID;
+}
+
+<div class="newUserAccountMain">
+    <h1 class="newUserAccountTitle">Escolha um usuário</h1>
+    <h2 class="newUserAccountSubTitle">É possível criar um novo usuário clicando <a href="#">aqui</a>.</h2>
+    @{
+        if (usersOfUserAccount.Count > 0)
+        {
+            <div id="chooseUserGrid">
+                @foreach (var user in usersOfUserAccount)
+                {
+                    <div class="userProfile" id="userProfile/@user.id" name="userProfile/@user.id" onclick="selectUser('@user.nickname')" value="@user.id">
+                        <label>@user.nickname</label>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+<script>
+    function selectUser(userNickname) {
+        $.ajax(
+        {
+            type: 'POST',
+            dataType: 'JSON',
+            url: '@Url.Action("UserOfUserAccountLogin", "Auth")',
+            data: { 'sessionId': '@sessionId', 'userNickname': userNickname },
+            success:
+                function (response) {
+                    setTimeout(function () {
+                        window.location.href = "/";
+                    }, 1000);
+                },
+            error:
+                function (response) {
+                    alert("Error: " + response);
+                }
+            });
+    }
+</script>

@@ -1,0 +1,256 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+    Layout = "~/Views/Shared/myLayout.cshtml";
+    int qtdMovies = 25;
+
+    var userAccountLoggedId = "";
+    if (Html.Action("UserAccountLoggedId", "Auth") == null)
+    {
+        userAccountLoggedId = "";
+    }
+    else
+    {
+        userAccountLoggedId = Html.Action("UserAccountLoggedId", "Auth").ToString();
+    }
+
+    var userOfUserAccountLoggedId = "";
+    if (Html.Action("UserOfUserAccountLoggedId", "Auth") == null)
+    {
+        userOfUserAccountLoggedId = "";
+    }
+    else
+    {
+        userOfUserAccountLoggedId = Html.Action("UserOfUserAccountLoggedId", "Auth").ToString();
+    }
+}
+
+<style>
+    html, body {
+        background: url(../../Assets/logo-color.png) no-repeat center center fixed;
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+    }
+
+    .mainCentralLogo {
+        position: absolute;
+        margin-left: auto;
+        margin-right: auto;
+        top: 50%;
+        left: 0;
+        right: 0;
+        text-align: center;
+    }
+</style>
+
+<span id="spanOfCentralLogo" name="spanOfCentralLogo"><img class="mainCentralLogo" style="margin-top: 0px;" src="/../Assets/logo-no-background.svg" height="90px" alt="" /></span>
+
+<input class="bookSearchInput" id="bookSearchInput" name="bookSearchInput" type="text" placeholder="Pesquise um livro aqui"/> <span><img src="/../Assets/search.svg" height="30px" onclick="searchBooks()" style="margin-left: -85px" /></span><br /><br />
+<h2 class="bookSubtitleInfo">Após digitar aquilo que deseja buscar, clique na lupa.</h2>
+<br />
+<br />
+<div id="bookGrid" style="display: none;">
+    @{
+        for (var iterador = 0; iterador < qtdMovies; iterador++)
+        {
+            <div class="bookProfile" id="bookProfile/@iterador" name="bookProfile/@iterador" onclick="getUserAcivity(@iterador)">
+                <a href="#">
+                    <div class="bookProfileContainer bookInfoProps" id="bookProfileContainer/@iterador" name="bookProfileContainer/@iterador">
+                        <input class="bookInfoInputReadonly" id="bookTitle/@iterador" disabled name="bookTitle/@iterador" value="Loading..." style="font-weight: 600"></input>
+                        <img style="width: 350px; height: 500px; padding: 13px 13px 13px 13px;" src="https://image.tmdb.org/t/p/w500/oj0ibkqKGJ3CvSTb3Pkx299P0SK.jpg" id="bookImg/@iterador" name="bookImg/@iterador" />
+                    </div><br />
+                    <div class="bookInfoProps">
+                        <label>Gênero</label>
+                        <input class="bookInfoInputReadonly" id="bookGenres/@iterador" name="bookGenres/@iterador" value="Loading..."></input>
+                    </div>
+                    <div class="bookInfoProps">
+                        <label>Popularidade</label>
+                        <input class="bookInfoInputReadonly" id="moviePopularity/@iterador" name="moviePopularity/@iterador" value="Loading..." />
+                    </div>
+                    <div class="bookInfoProps">
+                        <label>Lançado em</label>
+                        <input class="bookInfoInputReadonly" id="bookReleaseDate/@iterador" name="bookReleaseDate/@iterador" value="Loading..." />
+                    </div>
+                </a>
+            </div>
+        }
+    }
+</div>
+
+<script>
+    var bookCategoriesInArrayCategByCateg = [];
+    function searchBooks() {
+        var toFind = document.getElementById('bookSearchInput').value;
+        var books = [];
+        document.getElementById('bookGrid').style.display = "block";
+        document.getElementById('spanOfCentralLogo').style.display = "none";
+        $.get('https://www.googleapis.com/books/v1/volumes?q=' + toFind + "&maxResults=25")
+            .then((response) => {
+                for (var i = 0; i < response.items.length; i++) {
+                    $.get(response.items[i].selfLink)
+                        .then((secondResponse) => {
+                            //console.log(secondResponse);
+                            var bookTitle = "";
+                            var bookPublishedDate = "";
+                            var bookDescription = "";
+                            var bookCover = "";
+                            var bookCategories = [];
+
+
+                            if (typeof secondResponse.volumeInfo.title === "undefined" || secondResponse.volumeInfo.title === null) {
+                                secondResponse.volumeInfo.title = "notFound";
+                                bookTitle = "Desconhecido";
+                            } else {
+                                bookTitle = secondResponse.volumeInfo.title;
+                            }
+
+                            if (typeof secondResponse.volumeInfo.publishedDate === "undefined" || secondResponse.volumeInfo.publishedDate === null) {
+                                secondResponse.volumeInfo.publishedDate = "notFound";
+                                bookPublishedDate = "Desconhecido";
+                            } else {
+                                bookPublishedDate = secondResponse.volumeInfo.publishedDate;
+                            }
+
+                            if (typeof secondResponse.volumeInfo.description === "undefined" || secondResponse.volumeInfo.description === null) {
+                                secondResponse.volumeInfo.description = "notFound";
+                                bookDescription = "Desconhecido";
+                            } else {
+                                bookDescription = secondResponse.volumeInfo.description;
+                            }
+                            if (typeof secondResponse.volumeInfo.imageLinks === "undefined" || secondResponse.volumeInfo.imageLinks === null) {
+                                secondResponse.volumeInfo.imageLinks = "notFound";
+                                bookCover = "/../Assets/imgNotFound.png"; 
+                            } else {
+                                bookCover = secondResponse.volumeInfo.imageLinks.thumbnail;
+                                //bookCover = bookCover.replace("zoom=1", "zoom=3")
+                            }
+
+                            if (typeof secondResponse.volumeInfo.categories === "undefined" || secondResponse.volumeInfo.categories === null) {
+                                secondResponse.volumeInfo.categories = "notFound";
+                                bookCategories = [];
+                            } else {
+                                if (secondResponse.volumeInfo.categories.length > 1) {
+                                    bookCategories.push({
+                                        key: secondResponse.id.toString(),
+                                        value: secondResponse.volumeInfo.categories[0]
+                                    });
+
+                                    for (p = 1; p < secondResponse.volumeInfo.categories.length; p++) {
+                                        bookCategories[i - i].value = bookCategories[i - i].value + ", " + secondResponse.volumeInfo.categories[p];
+                                    }
+                                } else {
+                                    bookCategories.push({
+                                        key: secondResponse.id.toString(),
+                                        value: secondResponse.volumeInfo.categories[0]
+                                    });
+                                }
+                            }
+                            var bookCategoriesAfterSplit = "";
+                            if (bookCategories.length != 0) {
+                                bookCategoriesAfterSplit = bookCategories[0].value;
+                                bookCategoriesAfterSplit = bookCategoriesAfterSplit.split(/[\s,]+/);
+                            }
+
+                            for (var v = 0; v < bookCategoriesAfterSplit.length; v++) {
+                                if (bookCategoriesAfterSplit[v].length < 2 || bookCategoriesAfterSplit[v] == '&' || bookCategoriesAfterSplit[v] == '/') {
+                                    var indexOfElementToBeDeleted = bookCategoriesAfterSplit.indexOf(bookCategoriesAfterSplit[v]);
+                                    if (indexOfElementToBeDeleted > -1) {
+                                        bookCategoriesAfterSplit.splice(indexOfElementToBeDeleted, 1);
+                                    }
+                                } else {
+                                    bookCategoriesAfterSplit[v] = bookCategoriesAfterSplit[v].replaceAll("/", "");
+                                    bookCategoriesAfterSplit[v] = bookCategoriesAfterSplit[v].trim();
+                                }
+                            }
+
+                            let bookCategoriesFinal = [...new Set(bookCategoriesAfterSplit)];
+
+                            bookCategoriesInArrayCategByCateg.push({
+                                bookCategories: bookCategoriesFinal
+                            });
+
+                            var bookCategoriesUltimateFinal = "";
+                            for (var b = 0; b < bookCategoriesFinal.length; b++) {
+                                if (b > 0) {
+                                    bookCategoriesUltimateFinal = bookCategoriesUltimateFinal + ", " + bookCategoriesFinal[b];
+                                }
+                                else {
+                                    bookCategoriesUltimateFinal = bookCategoriesFinal[b];
+                                }
+                            }
+
+                            if (bookCategoriesUltimateFinal.length < 1 || bookCategoriesUltimateFinal == "") {
+                                bookCategoriesUltimateFinal = "Desconhecida(s)";
+                            }
+
+                            //console.log("Nome do livro: " + bookTitle + "\nAno da publicação: " + bookPublishedDate + "\nDescrição do livro: " + bookDescription + "\nCapa do livro: " + bookCover + "\nCategoria(s): " + bookCategoriesUltimateFinal + "\n------------------------");
+                            books.push({
+                                title: bookTitle,
+                                publishedDate: bookPublishedDate,
+                                description: bookDescription,
+                                bookCoverImg: bookCover,
+                                bookCategories: bookCategoriesUltimateFinal
+                            });
+                        }
+                        );
+                }
+            }
+        );
+        $.get(books)
+            .then((response) => {
+                for (var d = 0; d < books.length; d++) {
+                    document.getElementById('bookTitle/' + d).value = books[d].title;
+                    document.getElementById('bookTitle/' + d).style.width = document.getElementById('bookTitle/' + d).value.length + 2 + "ch";
+
+                    document.getElementById('bookImg/' + d).src = books[d].bookCoverImg;
+
+                    document.getElementById('bookGenres/' + d).value = books[d].bookCategories;
+                    document.getElementById('bookGenres/' + d).style.width = document.getElementById('bookGenres/' + d).value.length + 2 + "ch";
+
+                    var dateFinal = formatDateToBrFormat(books[d].publishedDate);
+                    document.getElementById('bookReleaseDate/' + d).value = dateFinal;
+                    document.getElementById('bookReleaseDate/' + d).style.width = document.getElementById('bookReleaseDate/' + d).value.length + 2 + "ch";
+                }
+            }
+        );
+    }
+
+    function formatDateToBrFormat(dateToFormat) {
+        var data = new Date(dateToFormat),
+            dia = data.getDate().toString(),
+            diaF = (dia.length == 1) ? '0' + dia : dia,
+            mes = (data.getMonth() + 1).toString(),
+            mesF = (mes.length == 1) ? '0' + mes : mes,
+            anoF = data.getFullYear();
+        return diaF + "/" + mesF + "/" + anoF;
+    }
+
+    function getUserAcivity(bookId) {
+        var bookCategories = document.getElementById('bookGenres/' + bookId).value;
+        const arr = bookCategories.split(',');
+        /*for (var j = 0; j < arr.length; j++) {
+            arr[j] = arr[j].trim();
+        }*/
+        for (var i = 0; i < arr.length; i++) {
+            if (arr[i].trim() == "Desconhecida(s)") {
+            } else {
+                $.ajax(
+            {
+                type: 'POST',
+                dataType: 'JSON',
+                url: '@Url.Action("GetUserActivity", "Activity")',
+                data: { 'userAccountLoggedId': @userAccountLoggedId, 'userLoggedId': @userOfUserAccountLoggedId, 'bookCategory': arr[i].trim(), 'contentsType': 'book'},
+                success:
+                    function (response) {
+                        //console.log("Ok");
+                    },
+                error:
+                    function (response) {
+                        alert("Error: " + response);
+                    }
+            });
+            }
+        }
+    }
+</script>

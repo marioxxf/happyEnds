@@ -1,0 +1,310 @@
+﻿@{
+    var userAccountLoggedShortName = "";
+    if (Html.Action("userAccountLoggedShortName", "Auth") == null)
+    {
+        userAccountLoggedShortName = "";
+    }
+    else
+    {
+        userAccountLoggedShortName = Html.Action("userAccountLoggedShortName", "Auth").ToString();
+    }
+
+    var userOfUserAccountLoggedNickname = "";
+    if (Html.Action("UserOfUserAccountLoggedNickname", "Auth") == null)
+    {
+        userOfUserAccountLoggedNickname = "";
+    }
+    else
+    {
+        userOfUserAccountLoggedNickname = Html.Action("UserOfUserAccountLoggedNickname", "Auth").ToString();
+    }
+    string sessionId = Session.SessionID;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" type="image/x-icon" href="~/Assets/happy-ends-website-favicon-color.svg">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=0.8, user-scalable=no" />
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> <!--- Fix Mixed Content's error '-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js" integrity="sha512-6UofPqm0QupIL0kzS/UIzekR73/luZdC6i/kXDbWnLOJoqwklBK6519iUnShaYceJ0y4FaiPtX/hRnV/X/xlUQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.min.js" integrity="sha384-IDwe1+LCz02ROU9k972gdyvl+AESN10+x7tBKgc9I5HFtuNz0wWnPclzo6p9vxnk" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/x-icon" href="~/Content/tempLogo.svg">
+    <link rel="stylesheet" href="https://localhost:44349/Style/components.css?version=1" />
+    <link rel="stylesheet" type="text/css" href="~/Style/components.css?version=<%= Common.GetVersion%>" />
+    <title>Happy Ends</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<style>
+    html, body {
+        background-color: #e1e2e3;
+    }
+</style>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top main" style="border-radius: 8px; margin: 7px; padding: 4px; background-color: #235bb2; border-color: #235bb2; color: white;">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" id="hamburguerMenu" name="hamburguerMenu" data-toggle="collapse" data-target=".navbar-collapse" title="mais opções" style="border-color: #235bb2;">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href="/" class="navbar-brand" style="color: white; font-size: 20px; margin-right: 30px;">Happy Ends</a>
+            </div>
+            <div class="navbar-collapse collapse" style="border-color: #235bb2;">
+                <ul class="nav navbar-nav">
+                    @{
+                        if (userAccountLoggedShortName != "")
+                        {
+                            <li>
+                                <div class="dropdown" style="margin-top: 13px;">
+                                    <a id="navbarDropdown" style="color: #ffffff;"><span><img style="margin-left: 25px;" id="imgPassLoginForm" name="imgPassLoginForm" src="/../Assets/user.svg" height="20px" alt="" /><label style="margin-left: 3px; font-weight:600;">@userAccountLoggedShortName (@userOfUserAccountLoggedNickname)</label></span></a><a onclick="fixBackgroundColor();" id="navbarDropdownTwo" name="navbarDropdownTwo" class="nav-link dropdown-toggle" href="#" name="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="/auth/new" style="color: #ffffff;"><span><img style="margin-left: 2px; margin-top: 5px;" src="/../Assets/corner-right-down.svg" height="20px" alt="" /></span></a>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="color: #ffffff;">
+                                        <li><a href="">Minha conta</a></li>
+                                        <li><a href="/auth/chooseuser">Trocar de usuário</a></li>
+                                        <!--<li><a href="#">Another action</a></li>
+                                        <li><a href="#">Something else here</a></li>-->
+                                        <li role="separator" class="divider"></li>
+                                        <li><a href="#" onclick="userAccountDesconnect()">Sair</a></li>
+                                    </ul>
+                                </div>
+                            </li>
+                        }
+                        else
+                        {
+                            <li>
+                                <div class="dropdown" style="margin-top: 13px;">
+                                    <a id="navbarDropdown" style="color: #ffffff;"><label style="margin-left: 3px; font-weight:600;">Crie sua conta ou faça login</label></a><a onclick="fixBackgroundColor();" id="navbarDropdownTwo" name="navbarDropdownTwo" class="nav-link dropdown-toggle" href="#" name="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" href="/auth/new" style="color: #ffffff;"><span><img style="margin-left: 2px; margin-top: 5px;" src="/../Assets/corner-right-down.svg" height="20px" alt="" /></span></a>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="color: #ffffff;">
+                                        <li><a href="/auth/new">Criar conta</a></li>
+                                        <li>
+                                            <a href="#" id="btnloginModal" name="btnloginModal" data-toggle="modal" data-target="#loginModal">Logar-se</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                        }
+                    }
+                    <!--<li><a class="liNavBar" style="color: white;" href="/auth/new">Cadastrar-se</a></li>-->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login's Modal-->
+    <div class="modal fade" id="loginModal" name="loginModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" style="margin-top: 100px;">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Faça o login e aproveite nossa plataforma</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="/auth/login" method="post">
+                        <div class="loginUserAccountMain">
+                            <h1 class="newUserAccountTitle">Digite seu e-mail</h1>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" size="25" id="txtEmailLoginForm" name="txtEmailLoginForm" aria-describedby="basic-addon1">
+                            </div>
+                            <label id="emailCheckLoginForm" name="emailCheckLoginForm"></label>
+
+                            <h1 class="newUserAccountTitle">Insira uma senha</h1>
+                            <div style="display: flex; gap: 7px;">
+                                <div class="input-group mb-3">
+                                    <input oninput="resetPassEntered()" type="password" class="form-control" size="25" id="txtPassLoginForm" name="txtPassLoginForm" aria-describedby="basic-addon1">
+                                </div>
+                                <div>
+                                    <span><img style="margin-top: 10px;" id="imgPassLoginForm" name="imgPassLoginForm" onclick="showPassLoginForm(this.src)" src="/../Assets/eye.svg" height="15px" alt="" /></span>
+                                </div>
+                            </div><label id="passCheck" name="passCheck"></label><br />
+
+                            <div class="d-grid gap-2 col-6 mx-auto">
+                                <input class="btn btn-primary" type="button" value="Logar-se" onclick="validateForm();">
+                                <input class="btn btn-primary" type="submit" id="btnSubmitLoginForm" name="btnSubmitLoginForm" style="display: none;">
+                                <input type="hidden" value="@sessionId" id="sessionIdLoginForm" name="sessionIdLoginForm" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <!---<button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary">Logar-se</button>-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container body-content" style="margin-top: 30px;">
+        @RenderBody()
+        <footer>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+</body>
+</html>
+
+<script>
+    function resetPassEntered() {
+        document.getElementById('passCheck').textContent = "";
+    }
+    $(document).ready(function () {
+        document.getElementById('hamburguerMenu').style.backgroundColor = "#235bb2";
+    });
+
+    function validateForm() {
+        var email = document.getElementById('txtEmailLoginForm').value;
+        var emailCheckLoginForm = document.getElementById('emailCheckLoginForm').textContent;
+        var emailValidate = "";
+        var pass = document.getElementById('txtPassLoginForm').value;
+        var passValidate = "";
+
+        /* Check if email exists */
+        $.ajax(
+        {
+            type: 'POST',
+            dataType: 'JSON',
+            url: '@Url.Action("CheckEmail", "Auth")',
+            data: { 'email': email },
+            success:
+                function (response) {
+                    for (var i = 0; i < response.length; i++){
+                        emailValidate = emailValidate + response[i];
+                    }
+                },
+            error:
+                function (response) {
+                    alert("Error: " + response);
+                }
+            });
+
+        /* Check if pass is correct */
+        $.ajax(
+        {
+            type: 'POST',
+            dataType: 'JSON',
+            url: '@Url.Action("CheckPass", "Auth")',
+            data: { 'pass': pass, 'email': email },
+            success:
+                function (response) {
+                    console.log(response);
+                    for (var i = 0; i < response.length; i++){
+                        passValidate = passValidate + response[i];
+                    }
+                },
+            error:
+                function (response) {
+                    alert("Error: " + response);
+                }
+            });
+
+        /* Form validation */
+        setTimeout(function () {
+            emailValidate = emailValidate.replace(/"/g, '');
+            passValidate = passValidate.replace(/"/g, '');
+            if (emailValidate == "userAccountNotFounded") {
+                document.getElementById("txtEmailLoginForm").focus();
+                document.getElementById('emailCheckLoginForm').style.color = "red";
+                document.getElementById('emailCheckLoginForm').textContent = "O e-mail inserido não está cadastrado.";
+            } else if (emailCheckLoginForm.match(/não é um.*/) || email == "") {
+                document.getElementById("txtEmailLoginForm").focus();
+            } else if (passValidate == "nokPass") {
+                console.log("Here: " + passValidate);
+                document.getElementById("txtPassLoginForm").focus();
+                document.getElementById('passCheck').style.color = "red";
+                document.getElementById('passCheck').textContent = "Senha incorreta.";
+            }
+            else {
+                document.getElementById('btnSubmitLoginForm').click();
+            }
+        }, 1000);
+
+
+    }
+
+    function fixBackgroundColor() {
+        var dropdownBtn = document.getElementById('navbarDropdown');
+        var dropdownBtnTwo = document.getElementById('navbarDropdownTwo');
+        if (typeof (dropdownBtn) != 'undefined' && dropdownBtn != null) {
+            dropdownBtn.style.backgroundColor = "transparent";
+            } else {
+        }
+
+        if (typeof (dropdownBtnTwo) != 'undefined' && dropdownBtnTwo != null) {
+            dropdownBtnTwo.style.backgroundColor = "transparent";
+        } else {
+        }
+    }
+
+    function userAccountDesconnect() {
+        setTimeout(function () {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("UserAccountDisconnect", "Auth")',
+                data: '',
+                contentType: "application/json; charset=utf-8",
+                success: function () {
+                    console.log("User Account has been disconnected.");
+                    location.reload();
+                },
+                error: function () {
+                    console.log("Sistema tentou localizar uma View para o ActionResult Desconecta, mas ele não existe. Usuário desconectado da mesma forma!");
+                }
+            });
+        }, 1000);
+    }
+
+    /* For see entered password */
+    function showPassLoginForm(src) {
+        var fileNameOfSrc = src.replace(/^.*[\\\/]/, '');
+        if (fileNameOfSrc.match(/eye.svg.*/)) {
+            var newFileNameOfSrc = "eye-off.svg";
+            var newSrc = "/../Assets/" + newFileNameOfSrc;
+            document.getElementById('imgPassLoginForm').src = newSrc;
+        }
+        else if (fileNameOfSrc.match(/eye-off.svg.*/)) {
+            var newFileNameOfSrc = "eye.svg";
+            var newSrc = "/../Assets/" + newFileNameOfSrc;
+            document.getElementById('imgPassLoginForm').src = newSrc;
+        }
+        var x = document.getElementById("txtPassLoginForm");
+        if (x.type === "password") {
+            x.type = "text";
+        } else {
+            x.type = "password";
+        }
+    }
+
+    /* Email's Validate */
+    const validateEmailTwo = (email) => {
+        return email.match(
+            /^(([^<>()[\]\\.,;:\s@@\"]+(\.[^<>()[\]\\.,;:\s@@\"]+)*)|(\".+\"))@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        );
+    };
+    const validate = () => {
+        const $result = $('#emailCheckLoginForm');
+        const email = $('#txtEmailLoginForm').val();
+        $result.text('');
+
+        if (validateEmailTwo(email)) {
+            /*$result.text(email + ' é um e-mail válido.');
+            $result.css('color', 'green');*/
+        } else if (email == "") {
+            $result.text(email + 'Este campo não pode ser vazio.');
+            $result.css('color', 'red');
+        }
+        else {
+            $result.text(email + ' não é um e-mail válido.');
+            $result.css('color', 'red');
+        }
+        return false;
+    }
+    $('#txtEmailLoginForm').on('input', validate);
+</script>
